@@ -20,7 +20,6 @@
         }
     },
     // Commands to execute on container creation,start.
-    "postCreateCommand": "bash scripts/postCreateCommand.sh",
     "onCreateCommand": "bash scripts/onCreateCommand.sh",
 
     "containerEnv": {
