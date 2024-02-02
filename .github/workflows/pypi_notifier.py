@@ -13,42 +13,43 @@ from urllib import request
 
 from urllib.request import urlopen
 import json
+from packaging import version
 
 # importlib.metadata
 #####################################################################
-import importlib.metadata
+# import importlib.metadata
 
 
-def use_importlib_metadata():
-    # List all installed distributions???
-    distributions = importlib.metadata.distributions()
+# def use_importlib_metadata():
+#     # List all installed distributions???
+#     distributions = importlib.metadata.distributions()
 
-    # Create a dictionary to store package names and their versions .
-    installed_packages = {}
+#     # Create a dictionary to store package names and their versions .
+#     installed_packages = {}
 
-    # Iterate over the distributions and get their name and version .
-    for distribution in distributions:
-        name = distribution.metadata["Name"]
-        version = distribution.version
-        installed_packages[name] = version
+#     # Iterate over the distributions and get their name and version .
+#     for distribution in distributions:
+#         name = distribution.metadata["Name"]
+#         version = distribution.version
+#         installed_packages[name] = version
 
-    # Print pair of package and the version .
-    for package, version in installed_packages.items():
-        print(f"{package}: {version}")
-    #######################################################################
+#     # Print pair of package and the version .
+#     for package, version in installed_packages.items():
+#         print(f"{package}: {version}")
+#     #######################################################################
 
 
-###### pip list way vs. importlib_metadata way ######
-def get_installed_packages():
-    # Run "pip list" and output in JSON format
-    process = subprocess.run(
-        ["pip", "list", "--format=json"], capture_output=True, text=True, check=True
-    )
+# ###### pip list way vs. importlib_metadata way ######
+# def get_installed_packages():
+#     # Run "pip list" and output in JSON format
+#     process = subprocess.run(
+#         ["pip", "list", "--format=json"], capture_output=True, text=True, check=True
+#     )
 
-    # Parse the JSON output
-    packages = json.loads(process.stdout)
-    # print(packages)
-    return packages
+#     # Parse the JSON output
+#     packages = json.loads(process.stdout)
+#     # print(packages)
+#     return packages
 
 
 ###### pip list way vs. importlib_metadata way ######
@@ -66,6 +67,19 @@ def get_latest_package_version(package_name):
 # feetch all version from pypi, put them into list, version object, sort list, look at the greatest version found in pypi, then compare
 
 ### is it sorted?  there could have been bug fix version
+
+
+def fetch_package_versions(package_name):
+    url = f"https://pypi.org/pypi/{package_name}/json"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        versions = data["releases"].keys()
+        return sorted(versions, key=lambda v: version.parse(v))
+    else:
+        print(f"Failed to fetch data for {package_name}")
+        return None
 
 
 # Iterate through all package we have to fetch latest
@@ -94,8 +108,6 @@ def main():
     requirement_content = pathlib.Path(root_path, "requirements.txt").read_text(
         encoding="utf-8"
     )
-
-    # stricter ->
 
     # Dictionary of package name and its version
     packages = {}
@@ -142,7 +154,7 @@ if __name__ == "__main__":
 # targeted dependabot - instead of all dependencies
 # if github action doesnt exist
 
-
+# use version from packaging so we can sort
 # tools repo target tool itself
 
 # for python repo target pytest since want to test
