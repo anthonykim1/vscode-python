@@ -26,5 +26,12 @@ export class CodeActionProviderService implements IExtensionSingleActivationServ
                 providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
             }),
         );
+
+        // TODO: Suggest Native REPL code action quick fix
+        this.disposableRegistry.push(
+            vscode.languages.registerCodeActionsProvider('python', new PythonNativeReplSuggestionProvider(), {
+                providedCodeActionKinds: [vscode.CodeActionKind.QuickFix],
+            }),
+        );
     }
 }
