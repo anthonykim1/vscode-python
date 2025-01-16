@@ -3,7 +3,7 @@
 
 'use strict';
 
-import { DebugConfigurationProvider, debug, languages, window } from 'vscode';
+import { DebugConfigurationProvider, TerminalCompletionItemKind, debug, languages, window } from 'vscode';
 
 import { registerTypes as activationRegisterTypes } from './activation/serviceRegistry';
 import { IExtensionActivationManager } from './activation/types';
@@ -115,6 +115,29 @@ export function activateFeatures(ext: ExtensionState, _components: Components): 
     registerStartNativeReplCommand(ext.disposables, interpreterService);
     registerReplCommands(ext.disposables, interpreterService, executionHelper, commandManager);
     registerReplExecuteOnEnter(ext.disposables, interpreterService, commandManager);
+    window.registerTerminalCompletionProvider({
+        id: 'python',
+        // eslint-disable-next-line arrow-body-style
+        provideTerminalCompletions: (_terminal, context, _token) => {
+            // TODO: Check terminal.shellType is Python
+            // if (!python) {
+            //     return [];
+            // }
+
+            // Create text document and fill in with context.commandLine, set cursor to context.cursorPosition
+            // Ask LSP for completions
+            // Map completions into TerminalCompletion[]
+
+            return [
+                {
+                    label: 'HiPython',
+                    replacementIndex: 0,
+                    replacementLength: context.cursorPosition,
+                    kind: TerminalCompletionItemKind.Method,
+                },
+            ];
+        },
+    });
 }
 
 /// //////////////////////////
