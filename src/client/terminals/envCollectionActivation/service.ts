@@ -174,6 +174,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
 
     private async _applyCollectionImpl(resource: Resource, shell = this.applicationEnvironment.shell): Promise<void> {
         const workspaceFolder = this.getWorkspaceFolder(resource);
+        traceLog(`Inside _applyCollectionImpl in service.ts, workspace folder is:  ${workspaceFolder}`);
         const settings = this.configurationService.getSettings(resource);
         const envVarCollection = this.getEnvironmentVariableCollection({ workspaceFolder });
         if (useEnvExtension()) {
@@ -317,6 +318,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
     private terminalPromptIsUnknown(resource: Resource) {
         const key = this.getWorkspaceFolder(resource)?.index;
         this.isPromptSet.delete(key);
+        traceLog(`Inside terminalPromptIsUnknown in service.ts: this.PromptSet.delete: ${key}\n`);
     }
 
     /**
@@ -324,6 +326,9 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
      */
     private async trackTerminalPrompt(shell: string, resource: Resource, env: EnvironmentVariables | undefined) {
         this.terminalPromptIsUnknown(resource);
+        traceLog(
+            `Inside trackTerminalPrompt in service.ts: just called terminalPromptIsUnknown with resource: ${resource}\n`,
+        );
         if (!env) {
             this.terminalPromptIsCorrect(resource);
             return;
@@ -338,11 +343,12 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
             const shouldSetPS1 = shouldPS1BeSet(interpreter?.type, env);
             if (shouldSetPS1 && !env.PS1) {
                 // PS1 should be set but no PS1 was set.
+                traceVerbose('service.ts if (shouldSetPS1 && !env.PS1) condition \n');
                 return;
             }
             const config = await this.shellIntegrationDetectionService.isWorking();
             if (!config) {
-                traceVerbose('PS1 is not set when shell integration is disabled.');
+                traceVerbose('PS1 is not set when shell integration is disabled.\n');
                 return;
             }
         }
@@ -353,7 +359,9 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
         // PS1 returned by shell is not predictable: #22078
         // Hence calculate it ourselves where possible. Should no longer be needed once #22128 is available.
         const customShellType = identifyShellFromShellPath(shell);
+        traceLog(`Inside getPS1 in service.ts: Custom shell type is ${customShellType}`);
         if (this.noPromptVariableShells.includes(customShellType)) {
+            traceLog(`Inside getPS1 in service.ts: No prompt variable shells\n`);
             return env.PS1;
         }
         if (this.platform.osType !== OSType.Windows) {
@@ -369,6 +377,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
         }
         if (env.PS1) {
             // Prefer PS1 set by env vars, as env.PS1 may or may not contain the full PS1: #22056.
+            traceLog(`Inside getPS1 in service.ts: Returning PS1 from env vars`);
             return env.PS1;
         }
         return undefined;
