@@ -244,8 +244,9 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                         return;
                     }
                     if (key === 'PATH') {
+                        // perhaps PATH is getting messed up
                         const options = {
-                            applyAtShellIntegration: true,
+                            applyAtShellIntegration: false,
                             applyAtProcessCreation: true,
                         };
                         if (processEnv.PATH && env.PATH?.endsWith(processEnv.PATH)) {
@@ -278,7 +279,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                         return;
                     }
                     const options = {
-                        applyAtShellIntegration: true,
+                        applyAtShellIntegration: false,
                         applyAtProcessCreation: true,
                     };
                     traceLog(
@@ -409,7 +410,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                     envVarCollection.replace(
                         'PATH',
                         `${path.dirname(interpreter.path)}${path.delimiter}${process.env[pathVarName]}`,
-                        { applyAtShellIntegration: true, applyAtProcessCreation: true },
+                        { applyAtShellIntegration: false, applyAtProcessCreation: true },
                     );
                     return;
                 }
@@ -426,11 +427,11 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
         // TODO: Stop prepending altogether once https://github.com/microsoft/vscode/issues/145234 is available.
         return isActive
             ? {
-                  applyAtShellIntegration: true,
+                  applyAtShellIntegration: false,
                   applyAtProcessCreation: false,
               }
             : {
-                  applyAtShellIntegration: true, // Takes care of false negatives in case manual integration is being used.
+                  applyAtShellIntegration: false, // Takes care of false negatives in case manual integration is being used.
                   applyAtProcessCreation: true,
               };
     }
