@@ -246,8 +246,8 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                     if (key === 'PATH') {
                         // perhaps PATH is getting messed up
                         const options = {
-                            applyAtShellIntegration: false,
-                            applyAtProcessCreation: true,
+                            applyAtShellIntegration: true,
+                            applyAtProcessCreation: false,
                         };
                         if (processEnv.PATH && env.PATH?.endsWith(processEnv.PATH)) {
                             // Prefer prepending to PATH instead of replacing it, as we do not want to replace any
@@ -279,8 +279,8 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                         return;
                     }
                     const options = {
-                        applyAtShellIntegration: false,
-                        applyAtProcessCreation: true,
+                        applyAtShellIntegration: true,
+                        applyAtProcessCreation: false,
                     };
                     traceLog(
                         `Setting environment variable ${key} in collection to ${value} ${JSON.stringify(options)}`,
@@ -410,7 +410,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                     envVarCollection.replace(
                         'PATH',
                         `${path.dirname(interpreter.path)}${path.delimiter}${process.env[pathVarName]}`,
-                        { applyAtShellIntegration: false, applyAtProcessCreation: true },
+                        { applyAtShellIntegration: true, applyAtProcessCreation: false },
                     );
                     return;
                 }
@@ -427,12 +427,12 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
         // TODO: Stop prepending altogether once https://github.com/microsoft/vscode/issues/145234 is available.
         return isActive
             ? {
-                  applyAtShellIntegration: false,
-                  applyAtProcessCreation: true,
+                  applyAtShellIntegration: true,
+                  applyAtProcessCreation: false,
               }
             : {
-                  applyAtShellIntegration: false, // Takes care of false negatives in case manual integration is being used.
-                  applyAtProcessCreation: true,
+                  applyAtShellIntegration: true, // Update for consistency with the previous edits
+                  applyAtProcessCreation: false, // Update for consistency with the previous edits
               };
     }
 
