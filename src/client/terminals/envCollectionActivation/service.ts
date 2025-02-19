@@ -428,7 +428,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
         return isActive
             ? {
                   applyAtShellIntegration: false,
-                  applyAtProcessCreation: false,
+                  applyAtProcessCreation: true,
               }
             : {
                   applyAtShellIntegration: false, // Takes care of false negatives in case manual integration is being used.
