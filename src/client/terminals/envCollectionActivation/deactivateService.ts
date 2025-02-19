@@ -47,7 +47,7 @@ export class TerminalDeactivateService implements ITerminalDeactivateService {
             return;
         }
         const shellType = identifyShellFromShellPath(shell);
-        const terminal = this.terminalManager.createTerminal({
+        const terminal = this.terminalManager.createTerminal({ // maybe cwd is getting carried over from here?
             name: `Python ${shellType} Deactivate`,
             shellPath: shell,
             hideFromUser: true,

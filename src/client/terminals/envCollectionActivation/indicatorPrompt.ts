@@ -59,7 +59,7 @@ export class TerminalIndicatorPrompt implements IExtensionSingleActivationServic
                     // Only show this notification for basic terminals created using the '+' button.
                     return;
                 }
-                const cwd =
+                const cwd = /// I Dont think this sets the cwd, it just recies it from terminal.creationOptions
                     'cwd' in terminal.creationOptions && terminal.creationOptions.cwd
                         ? terminal.creationOptions.cwd
                         : this.activeResourceService.getActiveResource();

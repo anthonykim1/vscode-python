@@ -310,7 +310,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
      * Call this once we know terminal prompt is set correctly for terminal owned by this resource.
      */
     private terminalPromptIsCorrect(resource: Resource) {
-        const key = this.getWorkspaceFolder(resource)?.index;
+        const key = this.getWorkspaceFolder(resource)?.index; // Suspicious??
         this.isPromptSet.set(key, true);
     }
 
