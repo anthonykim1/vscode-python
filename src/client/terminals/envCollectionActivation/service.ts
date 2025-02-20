@@ -243,6 +243,7 @@ export class TerminalEnvVarCollectionService implements IExtensionActivationServ
                         envVarCollection.prepend(key, value, defaultPrependOptions);
                         return;
                     }
+                    // Avoid setting PWD.
                     if (key === 'PATH') {
                         // perhaps PATH is getting messed up
                         const options = {
@@ -482,6 +483,7 @@ function shouldSkip(env: string) {
         'PYTHONUTF8',
         // We have deactivate service which takes care of setting it.
         '_OLD_VIRTUAL_PATH',
+        'PWD',
     ].includes(env);
 }
 

@@ -180,6 +180,8 @@ export class EnvironmentActivationService implements IEnvironmentActivationServi
 
     @cache(-1, true)
     public async getProcessEnvironmentVariables(resource: Resource, shell?: string): Promise<EnvironmentVariables> {
+        // Shell mightve been not gitbash.. Hence messed up path.. lol
+
         // Try to get the process environment variables using Python by printing variables, that can be little different
         // from `process.env` and is preferred when calculating diff.
         const globalInterpreters = this.interpreterService
