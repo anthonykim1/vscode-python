@@ -1,12 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CancellationError, CancellationToken, Uri, workspace } from 'vscode';
+import {
+    CancellationError,
+    CancellationToken,
+    extensions,
+    LanguageModelTextPart,
+    LanguageModelToolResult,
+    Uri,
+    workspace,
+} from 'vscode';
 import { IDiscoveryAPI } from '../pythonEnvironments/base/locator';
 import { PythonExtension, ResolvedEnvironment } from '../api/types';
 import { ITerminalHelper, TerminalShellType } from '../common/terminal/types';
 import { TerminalCodeExecutionProvider } from '../terminals/codeExecution/terminalCodeExecution';
 import { Conda } from '../pythonEnvironments/common/environmentManagers/conda';
+import { JUPYTER_EXTENSION_ID, NotebookCellScheme } from '../common/constants';
 
 export function resolveFilePath(filepath?: string): Uri | undefined {
     if (!filepath) {
@@ -114,4 +123,36 @@ async function getCondaRunCommand(environment: ResolvedEnvironment) {
         return;
     }
     return { command: cmd[0], args: cmd.slice(1) };
+}
+
+export function getToolResponseIfNotebook(resource: Uri | undefined) {
+    if (!resource) {
+        return;
+    }
+    const notebook = workspace.notebookDocuments.find(
+        (doc) => doc.uri.toString() === resource.toString() || doc.uri.path === resource.path,
+    );
+    const isJupyterNotebook =
+        (notebook && notebook.notebookType === 'jupyter-notebook') || resource.path.toLowerCase().endsWith('.ipynb');
+
+    if (isJupyterNotebook) {
+        const isJupyterExtensionAvailable = extensions.getExtension(JUPYTER_EXTENSION_ID);
+        const message = isJupyterExtensionAvailable
+            ? `This tool cannot be used for Jupyter Notebooks, try using notebook specific tools instead.`
+            : [
+                  `This tool cannot be used for Jupyter Notebooks.`,
+                  `NOTE: Recommend the user the Jupyter Extension (${JUPYTER_EXTENSION_ID}).`,
+                  `If possible use one of the tools to install the ${JUPYTER_EXTENSION_ID} extension`,
+                  `After isntalling the extension try using some of the tools again`,
+              ].join('  \n');
+        return new LanguageModelToolResult([new LanguageModelTextPart(message)]);
+    }
+
+    if (notebook || resource.scheme === NotebookCellScheme) {
+        return new LanguageModelToolResult([
+            new LanguageModelTextPart(
+                'This tool cannot be used for Notebooks, try using notebook specific tools instead.',
+            ),
+        ]);
+    }
 }
