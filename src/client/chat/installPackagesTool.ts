@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import {
-    CancellationError,
     CancellationToken,
     l10n,
     LanguageModelTextPart,
@@ -14,14 +13,20 @@ import {
 } from 'vscode';
 import { PythonExtension } from '../api/types';
 import { IServiceContainer } from '../ioc/types';
-import { getEnvDisplayName, getToolResponseIfNotebook, raceCancellationError } from './utils';
+import {
+    getEnvDisplayName,
+    getToolResponseIfNotebook,
+    IResourceReference,
+    isCancellationError,
+    isCondaEnv,
+    raceCancellationError,
+} from './utils';
 import { resolveFilePath } from './utils';
 import { IModuleInstaller } from '../common/installer/types';
 import { ModuleInstallerType } from '../pythonEnvironments/info';
 import { IDiscoveryAPI } from '../pythonEnvironments/base/locator';
 
-export interface IInstallPackageArgs {
-    resourcePath?: string;
+export interface IInstallPackageArgs extends IResourceReference {
     packageList: string[];
 }
 
@@ -32,12 +37,7 @@ export class InstallPackagesTool implements LanguageModelTool<IInstallPackageArg
         private readonly serviceContainer: IServiceContainer,
         private readonly discovery: IDiscoveryAPI,
     ) {}
-    /**
-     * Invokes the tool to get the information about the Python environment.
-     * @param options - The invocation options containing the file path.
-     * @param token - The cancellation token.
-     * @returns The result containing the information about the Python environment or an error message.
-     */
+
     async invoke(
         options: LanguageModelToolInvocationOptions<IInstallPackageArgs>,
         token: CancellationToken,
@@ -57,7 +57,7 @@ export class InstallPackagesTool implements LanguageModelTool<IInstallPackageArg
             if (!environment || !environment.version) {
                 throw new Error('No environment found for the provided resource path: ' + resourcePath?.fsPath);
             }
-            const isConda = (environment.environment?.type || '').toLowerCase() === 'conda';
+            const isConda = isCondaEnv(environment);
             const installers = this.serviceContainer.getAll<IModuleInstaller>(IModuleInstaller);
             const installerType = isConda ? ModuleInstallerType.Conda : ModuleInstallerType.Pip;
             const installer = installers.find((i) => i.type === installerType);
@@ -74,7 +74,7 @@ export class InstallPackagesTool implements LanguageModelTool<IInstallPackageArg
             const resultMessage = `Successfully installed ${packagePlurality}: ${options.input.packageList.join(', ')}`;
             return new LanguageModelToolResult([new LanguageModelTextPart(resultMessage)]);
         } catch (error) {
-            if (error instanceof CancellationError) {
+            if (isCancellationError(error)) {
                 throw error;
             }
             const errorMessage = `An error occurred while installing ${packagePlurality}: ${error}`;
