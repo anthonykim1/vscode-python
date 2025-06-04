@@ -22,6 +22,7 @@ import {
     doesWorkspaceHaveVenvOrCondaEnv,
     getDisplayVersion,
     getEnvDetailsForResponse,
+    getUntrustedWorkspaceResponse,
     IResourceReference,
     isCancellationError,
     raceCancellationError,
@@ -72,6 +73,9 @@ export class CreateVirtualEnvTool implements LanguageModelTool<ICreateVirtualEnv
         options: LanguageModelToolInvocationOptions<ICreateVirtualEnvToolParams>,
         token: CancellationToken,
     ): Promise<LanguageModelToolResult> {
+        if (!workspace.isTrusted) {
+            return getUntrustedWorkspaceResponse();
+        }
         const resource = resolveFilePath(options.input.resourcePath);
         let info = await this.getPreferredEnvForCreation(resource);
         if (!info) {

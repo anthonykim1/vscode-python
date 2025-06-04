@@ -19,6 +19,7 @@ import { TerminalCodeExecutionProvider } from '../terminals/codeExecution/termin
 import {
     getEnvDetailsForResponse,
     getToolResponseIfNotebook,
+    getUntrustedWorkspaceResponse,
     IResourceReference,
     isCancellationError,
     raceCancellationError,
@@ -53,6 +54,9 @@ export class ConfigurePythonEnvTool implements LanguageModelTool<IResourceRefere
         options: LanguageModelToolInvocationOptions<IResourceReference>,
         token: CancellationToken,
     ): Promise<LanguageModelToolResult> {
+        if (!workspace.isTrusted) {
+            return getUntrustedWorkspaceResponse();
+        }
         const resource = resolveFilePath(options.input.resourcePath);
         const notebookResponse = getToolResponseIfNotebook(resource);
         if (notebookResponse) {
